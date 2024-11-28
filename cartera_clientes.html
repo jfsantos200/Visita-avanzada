@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes - A4 Soluciones Corporativas</title>
+    <link rel="stylesheet" href="css/clientes.css">
+</head>
+<body>
+  <h1>Cartera de Clientes</h1>
+  <table id="clientesTable">
+    <tr>
+      <th>ID</th>
+      <th>Empresa</th>
+      <th>RNC</th>
+      <th>Rubro</th>
+      <th>Teléfono</th>
+      <th>Dirección</th>
+      <th>Email</th>
+      <th>Acciones</th>
+    </tr>
+  </table>
+
+  <script>
+    function loadClientes() {
+      fetch('/clients')
+        .then(response => response.json())
+        .then(data => {
+          const table = document.getElementById('clientesTable');
+          data.forEach(cliente => {
+            const row = table.insertRow();
+            row.innerHTML = `<td>${cliente.id}</td>
+                             <td>${cliente.empresa}</td>
+                             <td>${cliente.rnc}</td>
+                             <td>${cliente.rubro}</td>
+                             <td>${cliente.telefono}</td>
+                             <td>${cliente.direccion}</td>
+                             <td>${cliente.email}</td>
+                             <td><button onclick="deleteClient(${cliente.id})">Eliminar</button></td>`;
+          });
+        });
+    }
+
+    function deleteClient(id) {
+      fetch(`/clients/${id}`, { method: 'DELETE' })
+        .then(() => loadClientes());
+    }
+
+    loadClientes();
+  </script>
+</body>
+</html>

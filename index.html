@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - A4 Soluciones Corporativas</title>
+    <link rel="stylesheet" href="css/index.css"> 
+</head>
+<body>
+    <!-- Menú de navegación superior -->
+    <nav>
+        <div class="nav-container">
+            <!-- Contenedor de la imagen del logo -->
+            <div class="logo">
+                <img src="a4.png" alt="Logo A4 Soluciones Corporativas">
+            </div>
+            <!-- Menú de navegación -->
+            <div class="menu">
+                <a href="index.html" class="active">Inicio</a>
+                <a href="login.html" id="authButton">Login</a>
+                <a href="formulario_visita.html" class="form-link">Registro de Visita</a>
+                <a href="cotizaciones.html" class="form-link">Cotizaciones</a>
+                <a href="cartera_clientes.html" class="form-link">Clientes</a>
+                <a href="usuarios.html" class="form-link">Gestion de usuarios</a>
+            </div>
+        </div>
+    </nav>
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <!-- Encabezado del documento -->
+        <header>
+            <h1>Bienvenido a A4 Soluciones</h1>
+            <p>Gestiona tus visitas, cotizaciones y más de manera eficiente.</p>
+        </header>
+        <!-- Sección de introducción -->
+        <section>
+            <h2>Nuestros Servicios</h2>
+            <p>En A4 Soluciones, ofrecemos una amplia gama de servicios para optimizar la gestión de tus ventas y relaciones con clientes. Nuestro sistema avanzado te permite registrar visitas, gestionar cotizaciones y mantener una comunicación efectiva con tus clientes.</p>
+        </section>
+        <!-- Sección: ¿Qué hacemos? -->
+        <section>
+            <h2>¿Qué Hacemos?</h2>
+            <p>Facilitamos a los vendedores el registro detallado de sus interacciones con los clientes, permitiendo un seguimiento eficiente y la generación de cotizaciones personalizadas. Además, nuestro sistema de envío y carga de cotizaciones simplifica el proceso de gestión y respuesta a las solicitudes de los clientes.</p>
+        </section>
+        <!-- Sección: Características Principales -->
+        <section>
+            <h2>Características Principales</h2>
+            <ul>
+                <li>Registro de visitas a clientes</li>
+                <li>Cartera de clientes</li>
+                <li>Generación y gestión de cotizaciones</li>
+                <li>Envío automático de cotizaciones por correo electrónico</li>
+                <li>Interfaz intuitiva y fácil de usar</li>
+            </ul>
+            <p>Estas funcionalidades están diseñadas para mejorar la productividad de tu equipo de ventas y garantizar una atención al cliente de alta calidad.</p>
+            <ol>
+                <li>Interfaz de usuario amigable</li>
+                <li>Acceso seguro mediante login</li>
+                <li>Soporte técnico continuo</li>
+                <li>Actualizaciones periódicas</li>
+            </ol>
+        </section>
+        <!-- Sección: Contacto Rápido -->
+        <section>
+        </section>
+    </div>
+    <!-- Pie de página -->
+    <footer>
+        <a href="" target="_blank" title="Powered by Jhonattan Santos"><strong>© 2024 A4 Soluciones Corp.</strong></a>
+    </footer>
+    <script>
+        // Función para actualizar el botón de autenticación
+        function updateAuthButton() {
+            const authButton = document.getElementById('authButton');
+            const loggedIn = localStorage.getItem('loggedIn') === 'true';
+            const username = localStorage.getItem('username');
+            if (loggedIn) {
+                authButton.textContent = 'Cerrar Sesión';
+                // Reubicar el botón al inicio de la menu
+                const menu = document.querySelector('.menu');
+                menu.insertBefore(authButton, menu.firstChild);
+            } else {
+                authButton.textContent = 'Login';
+                // Reubicar el botón al final de la menu
+                const menu = document.querySelector('.menu');
+                menu.appendChild(authButton);
+            }
+        }
+
+        // Función para manejar el logout
+        function handleLogout() {
+            localStorage.setItem('loggedIn', 'false');
+            localStorage.removeItem('username');
+            alert('Has cerrado sesión correctamente.');
+            window.location.href = 'index.html';
+        }
+
+        // Actualizar el botón al cargar la página
+        updateAuthButton();
+
+        // Añadir evento al botón de autenticación
+        document.getElementById('authButton').addEventListener('click', function() {
+            const loggedIn = localStorage.getItem('loggedIn') === 'true';
+            if (loggedIn) {
+                handleLogout();
+            } else {
+                // Redirigir al login.html
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Opcional: Activar o desactivar enlaces según el login
+        function updateMenuLinks() {
+            const loggedIn = localStorage.getItem('loggedIn') === 'true';
+            const formLinks = document.querySelectorAll('.form-link');
+            formLinks.forEach(link => {
+                if (loggedIn) {
+                    link.style.pointerEvents = 'auto';
+                    link.style.opacity = '1';
+                } else {
+                    link.style.pointerEvents = 'none';
+                    link.style.opacity = '0.5';
+                }
+            });
+        }
+
+        // Actualizar los enlaces al cargar
+        updateMenuLinks();
+
+        // Añadir un listener para cambios en el almacenamiento
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'loggedIn') {
+                updateAuthButton();
+                updateMenuLinks();
+            }
+        });
+    </script>
+</body>
+</html>

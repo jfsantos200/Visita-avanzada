@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotizaciones - A4 Soluciones Corporativas</title>
+    <link rel="stylesheet" href="css/cotizaciones.css">
+<!-- </head>
+<body>
+  <h1>Gestión de Cotizaciones</h1>
+  <form id="quoteForm">
+    <label for="cliente_id">Cliente ID:</label>
+    <input type="number" id="cliente_id" name="cliente_id" required>
+    <label for="producto">Producto/Servicio:</label>
+    <input type="text" id="producto" name="producto" required>
+    <label for="cantidad">Cantidad:</label>
+    <input type="number" id="cantidad" name="cantidad" required>
+    <label for="precio_unitario">Precio Unitario:</label>
+    <input type="number" id="precio_unitario" name="precio_unitario" required>
+    <label for="fecha_entrega">Fecha de Entrega:</label>
+    <input type="date" id="fecha_entrega" name="fecha_entrega" required>
+    <button type="submit">Crear Cotización</button>
+  </form>
+
+  <h2>Listado de Cotizaciones</h2>
+  <table id="quotesTable">
+    <tr>
+      <th>ID</th>
+      <th>Cliente ID</th>
+      <th>Producto/Servicio</th>
+      <th>Cantidad</th>
+      <th>Precio Unitario</th>
+      <th>Fecha de Entrega</th>
+      <th>Acciones</th>
+    </tr>
+  </table>
+
+  <script>
+    function loadQuotes() {
+      fetch('/quotes')
+        .then(response => response.json())
+        .then(data => {
+          const table = document.getElementById('quotesTable');
+          data.forEach(quote => {
+            const row = table.insertRow();
+            row.innerHTML = `<td>${quote.id}</td>
+                             <td>${quote.cliente_id}</td>
+                             <td>${quote.producto}</td>
+                             <td>${quote.cantidad}</td>
+                             <td>${quote.precio_unitario}</td>
+                             <td>${quote.fecha_entrega}</td>
+                             <td><button onclick="deleteQuote(${quote.id})">Eliminar</button></td>`;
+          });
+        });
+    }
+
+    function deleteQuote(id) {
+      fetch(`/quotes/${id}`, { method: 'DELETE' })
+        .then(() => loadQuotes());
+    }
+
+    document.getElementById('quoteForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const cliente_id = document.getElementById('cliente_id').value;
+      const producto = document.getElementById('producto').value;
+      const cantidad = document.getElementById('cantidad').value;
+      const precio_unitario = document.getElementById('precio_unitario').value;
+      const fecha_entrega = document.getElementById('fecha_entrega').value;
+
+      fetch('/quotes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cliente_id, producto, cantidad, precio_unitario, fecha_entrega })
+      }).then(() => loadQuotes());
+    });
+
+    loadQuotes();
+  </script>
+</body>
+</html> -->
+
+</head>
+<body>
+  <h1>Gestión de Cotizaciones</h1>
+  <form id="quoteForm" enctype="multipart/form-data">
+    <label for="cliente_id">Cliente:</label>
+    <select id="cliente_id" name="cliente_id" required>
+      <option value="">Selecciona un Cliente</option>
+    </select>
+
+    <label for="producto">Producto/Servicio:</label>
+    <input type="text" id="producto" name="producto" placeholder="Descripción del Producto o Servicio" required>
+
+    <label for="cantidad">Cantidad:</label>
+    <input type="number" id="cantidad" name="cantidad" min="1" required>
+
+    <label for="precio_unitario">Precio Unitario:</label>
+    <input type="number" id="precio_unitario" name="precio_unitario" step="0.01" placeholder="Precio en USD" required>
+
+    <label for="fecha_entrega">Fecha de Entrega:</label>
+    <input type="date" id="fecha_entrega" name="fecha_entrega" required>
+
+    <label for="file">Adjuntar PDF:</label>
+    <input type="file" id="file" name="file" accept="application/pdf" required>
+
+    <button type="submit">Crear Cotización</button>
+  </form>
+
+  <h2>Listado de Cotizaciones</h2>
+  <table id="quotesTable">
+    <tr>
+      <th>ID</th>
+      <th>Cliente</th>
+      <th>Producto/Servicio</th>
+      <th>Cantidad</th>
+      <th>Precio Unitario</th>
+      <th>Fecha de Entrega</th>
+      <th>Acciones</th>
+    </tr>
+  </table>
+
+  <script>
+    // Cargar clientes
+    function loadClients() {
+      fetch('/clients')
+        .then(response => response.json())
+        .then(data => {
+          const clienteSelect = document.getElementById('cliente_id');
+          data.forEach(cliente => {
+            const option = document.createElement('option');
+            option.value = cliente.id;
+            option.textContent = cliente.empresa;
+            clienteSelect.appendChild(option);
+          });
+        });
+    }
+
+    loadClients();
+
+    // Crear cotización
+    document.getElementById('quoteForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const formData = new FormData(this);
+
+      fetch('/quotes', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message) {
+          alert(data.message);
+          document.getElementById('quoteForm').reset();
+        } else {
+          alert('Error al crear cotización');
+        }
+      })
+      .catch(error => alert('Error al enviar cotización: ' + error));
+    });
+  </script>
+</body>
+</html>

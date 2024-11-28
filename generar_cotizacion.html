@@ -1,0 +1,396 @@
+<!-- <!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador de Cotización</title>
+  <link rel="stylesheet" href="/public/css/generar_cotizacion.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <h1>Generar Cotización</h1>
+  <form id="quoteForm">
+    <label for="cliente_id">Cliente:</label>
+    <select id="cliente_id" name="cliente_id" required>
+      <option value="">Selecciona un Cliente</option>
+    </select>
+
+    <label for="producto">Producto/Servicio:</label>
+    <input type="text" id="producto" name="producto" placeholder="Descripción del Producto o Servicio" required>
+
+    <label for="cantidad">Cantidad:</label>
+    <input type="number" id="cantidad" name="cantidad" min="1" required>
+
+    <label for="precio_unitario">Precio Unitario:</label>
+    <input type="number" id="precio_unitario" name="precio_unitario" step="0.01" placeholder="Precio en USD" required>
+
+    <label for="fecha_entrega">Fecha de Entrega:</label>
+    <input type="date" id="fecha_entrega" name="fecha_entrega" required>
+
+    <button type="submit">Crear Cotización</button>
+  </form>
+
+  <button id="generatePdfBtn">Generar PDF de Cotización</button>
+
+  <h2>Vista Previa de Cotización</h2>
+  <div id="quotePreview">
+    <p><strong>Cliente:</strong> <span id="clienteName">Selecciona un cliente</span></p>
+    <p><strong>Producto:</strong> <span id="productoPreview">-</span></p>
+    <p><strong>Cantidad:</strong> <span id="cantidadPreview">-</span></p>
+    <p><strong>Precio Unitario:</strong> <span id="precioPreview">-</span></p>
+    <p><strong>Fecha de Entrega:</strong> <span id="fechaPreview">-</span></p>
+  </div>
+
+  <script>
+    // Cargar clientes
+    function loadClients() {
+      fetch('/clients')
+        .then(response => response.json())
+        .then(data => {
+          const clienteSelect = document.getElementById('cliente_id');
+          data.forEach(cliente => {
+            const option = document.createElement('option');
+            option.value = cliente.id;
+            option.textContent = cliente.empresa;
+            clienteSelect.appendChild(option);
+          });
+        });
+    }
+
+    loadClients();
+
+    // Mostrar vista previa de la cotización
+    document.getElementById('quoteForm').addEventListener('input', function() {
+      const clienteId = document.getElementById('cliente_id').value;
+      const producto = document.getElementById('producto').value;
+      const cantidad = document.getElementById('cantidad').value;
+      const precio_unitario = document.getElementById('precio_unitario').value;
+      const fecha_entrega = document.getElementById('fecha_entrega').value;
+
+      fetch(`/clients/${clienteId}`)
+        .then(response => response.json())
+        .then(cliente => {
+          document.getElementById('clienteName').textContent = cliente.empresa || 'No seleccionado';
+        });
+
+      document.getElementById('productoPreview').textContent = producto || '-';
+      document.getElementById('cantidadPreview').textContent = cantidad || '-';
+      document.getElementById('precioPreview').textContent = precio_unitario || '-';
+      document.getElementById('fechaPreview').textContent = fecha_entrega || '-';
+    });
+
+    // Generar PDF con jsPDF
+    document.getElementById('generatePdfBtn').addEventListener('click', function() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const clienteName = document.getElementById('clienteName').textContent;
+      const producto = document.getElementById('productoPreview').textContent;
+      const cantidad = document.getElementById('cantidadPreview').textContent;
+      const precioUnitario = document.getElementById('precioPreview').textContent;
+      const fechaEntrega = document.getElementById('fechaPreview').textContent;
+
+      // Agregar contenido al PDF
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      doc.text(`Cotización para el cliente: ${clienteName}`, 10, 10);
+      doc.text(`Producto/Servicio: ${producto}`, 10, 20);
+      doc.text(`Cantidad: ${cantidad}`, 10, 30);
+      doc.text(`Precio Unitario: $${precioUnitario}`, 10, 40);
+      doc.text(`Fecha de Entrega: ${fechaEntrega}`, 10, 50);
+
+      // Generar el archivo PDF
+      doc.save('cotizacion.pdf');
+    });
+  </script>
+</body>
+</html> -->
+
+<!-- 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador de Cotización</title>
+  <link rel="stylesheet" href="/public/css/generar_cotizacion.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <h1>Generar Cotización</h1>
+  <form id="quoteForm">
+    <label for="cliente_id">Cliente:</label>
+    <select id="cliente_id" name="cliente_id" required>
+      <option value="">Selecciona un Cliente</option>
+    </select>
+
+    <label for="fecha">Fecha de la Cotización:</label>
+    <input type="date" id="fecha" name="fecha" required>
+
+    <label for="producto">Producto/Servicio:</label>
+    <input type="text" id="producto" name="producto" placeholder="Descripción del Producto o Servicio" required>
+
+    <label for="cantidad">Cantidad:</label>
+    <input type="number" id="cantidad" name="cantidad" min="1" value="1" required>
+
+    <label for="precio_unitario">Precio Unitario:</label>
+    <input type="number" id="precio_unitario" name="precio_unitario" step="0.01" placeholder="Precio por Unidad" required>
+
+    <label for="descuento">Descuento (%):</label>
+    <input type="number" id="descuento" name="descuento" value="0" min="0" max="100" step="0.1">
+
+    <div>
+      <p><strong>Subtotal:</strong> <span id="subtotal">0</span></p>
+      <p><strong>Total (después de descuento):</strong> <span id="total">0</span></p>
+    </div>
+
+    <button type="submit">Crear Cotización</button>
+  </form>
+
+  <button id="generatePdfBtn">Generar PDF de Cotización</button>
+
+  <h2>Vista Previa de Cotización</h2>
+  <div id="quotePreview">
+    <p><strong>Cliente:</strong> <span id="clienteName">Selecciona un cliente</span></p>
+    <p><strong>Producto:</strong> <span id="productoPreview">-</span></p>
+    <p><strong>Cantidad:</strong> <span id="cantidadPreview">-</span></p>
+    <p><strong>Precio Unitario:</strong> <span id="precioPreview">-</span></p>
+    <p><strong>Subtotal:</strong> <span id="subtotalPreview">-</span></p>
+    <p><strong>Total:</strong> <span id="totalPreview">-</span></p>
+  </div>
+
+  <script>
+    // Cargar clientes
+    function loadClients() {
+      fetch('/clients')
+        .then(response => response.json())
+        .then(data => {
+          const clienteSelect = document.getElementById('cliente_id');
+          data.forEach(cliente => {
+            const option = document.createElement('option');
+            option.value = cliente.id;
+            option.textContent = cliente.empresa;
+            clienteSelect.appendChild(option);
+          });
+        });
+    }
+
+    loadClients();
+
+    // Mostrar vista previa de la cotización
+    document.getElementById('quoteForm').addEventListener('input', function() {
+      const clienteId = document.getElementById('cliente_id').value;
+      const producto = document.getElementById('producto').value;
+      const cantidad = document.getElementById('cantidad').value;
+      const precio_unitario = document.getElementById('precio_unitario').value;
+      const descuento = document.getElementById('descuento').value;
+
+      fetch(`/clients/${clienteId}`)
+        .then(response => response.json())
+        .then(cliente => {
+          document.getElementById('clienteName').textContent = cliente.empresa || 'No seleccionado';
+        });
+
+      document.getElementById('productoPreview').textContent = producto || '-';
+      document.getElementById('cantidadPreview').textContent = cantidad || '-';
+      document.getElementById('precioPreview').textContent = precio_unitario || '-';
+
+      // Calcular Subtotal y Total
+      const subtotal = cantidad * precio_unitario;
+      const total = subtotal - (subtotal * (descuento / 100));
+
+      document.getElementById('subtotalPreview').textContent = subtotal.toFixed(2) || '-';
+      document.getElementById('totalPreview').textContent = total.toFixed(2) || '-';
+
+      // Actualizar los valores de Subtotal y Total
+      document.getElementById('subtotal').textContent = subtotal.toFixed(2) || '0';
+      document.getElementById('total').textContent = total.toFixed(2) || '0';
+    });
+
+    // Generar PDF con jsPDF
+    document.getElementById('generatePdfBtn').addEventListener('click', function() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const clienteName = document.getElementById('clienteName').textContent;
+      const producto = document.getElementById('productoPreview').textContent;
+      const cantidad = document.getElementById('cantidadPreview').textContent;
+      const precioUnitario = document.getElementById('precioPreview').textContent;
+      const subtotal = document.getElementById('subtotalPreview').textContent;
+      const total = document.getElementById('totalPreview').textContent;
+
+      // Agregar contenido al PDF
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      doc.text(`Cotización para el cliente: ${clienteName}`, 10, 10);
+      doc.text(`Producto/Servicio: ${producto}`, 10, 20);
+      doc.text(`Cantidad: ${cantidad}`, 10, 30);
+      doc.text(`Precio Unitario: $${precioUnitario}`, 10, 40);
+      doc.text(`Subtotal: $${subtotal}`, 10, 50);
+      doc.text(`Total: $${total}`, 10, 60);
+
+      // Generar el archivo PDF
+      doc.save('cotizacion.pdf');
+    });
+  </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador de Cotización</title>
+  <link rel="stylesheet" href="/public/css/generar_cotizacion.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <h1>Generar Cotización</h1>
+  <form id="quoteForm">
+    <label for="cliente_id">Cliente:</label>
+    <select id="cliente_id" name="cliente_id" required>
+      <option value="">Selecciona un Cliente</option>
+    </select>
+
+    <label for="fecha">Fecha de la Cotización:</label>
+    <input type="date" id="fecha" name="fecha" required>
+
+    <label for="producto">Producto/Servicio:</label>
+    <input type="text" id="producto" name="producto" placeholder="Descripción del Producto o Servicio" required>
+
+    <label for="cantidad">Cantidad:</label>
+    <input type="number" id="cantidad" name="cantidad" min="1" value="1" required>
+
+    <label for="precio_unitario">Precio Unitario:</label>
+    <input type="number" id="precio_unitario" name="precio_unitario" step="0.01" placeholder="Precio por Unidad" required>
+
+    <label for="descuento">Descuento (%):</label>
+    <input type="number" id="descuento" name="descuento" value="0" min="0" max="100" step="0.1">
+
+    <div>
+      <p><strong>Subtotal:</strong> <span id="subtotal">0</span></p>
+      <p><strong>Total (después de descuento):</strong> <span id="total">0</span></p>
+    </div>
+
+    <button type="submit">Crear Cotización</button>
+  </form>
+
+  <button id="generatePdfBtn">Generar PDF de Cotización</button>
+
+  <h2>Vista Previa de Cotización</h2>
+  <div id="quotePreview">
+    <p><strong>Cliente:</strong> <span id="clienteName">Selecciona un cliente</span></p>
+    <p><strong>Producto:</strong> <span id="productoPreview">-</span></p>
+    <p><strong>Cantidad:</strong> <span id="cantidadPreview">-</span></p>
+    <p><strong>Precio Unitario:</strong> <span id="precioPreview">-</span></p>
+    <p><strong>Subtotal:</strong> <span id="subtotalPreview">-</span></p>
+    <p><strong>Total:</strong> <span id="totalPreview">-</span></p>
+  </div>
+
+  <script>
+    // Cargar clientes
+    function loadClients() {
+      fetch('/clients')
+        .then(response => response.json())
+        .then(data => {
+          const clienteSelect = document.getElementById('cliente_id');
+          data.forEach(cliente => {
+            const option = document.createElement('option');
+            option.value = cliente.id;
+            option.textContent = cliente.empresa;
+            clienteSelect.appendChild(option);
+          });
+        });
+    }
+
+    loadClients();
+
+    // Mostrar vista previa de la cotización
+    document.getElementById('quoteForm').addEventListener('input', function() {
+      const clienteId = document.getElementById('cliente_id').value;
+      const producto = document.getElementById('producto').value;
+      const cantidad = document.getElementById('cantidad').value;
+      const precio_unitario = document.getElementById('precio_unitario').value;
+      const descuento = document.getElementById('descuento').value;
+
+      fetch(`/clients/${clienteId}`)
+        .then(response => response.json())
+        .then(cliente => {
+          document.getElementById('clienteName').textContent = cliente.empresa || 'No seleccionado';
+        });
+
+      document.getElementById('productoPreview').textContent = producto || '-';
+      document.getElementById('cantidadPreview').textContent = cantidad || '-';
+      document.getElementById('precioPreview').textContent = precio_unitario || '-';
+
+      // Calcular Subtotal y Total
+      const subtotal = cantidad * precio_unitario;
+      const total = subtotal - (subtotal * (descuento / 100));
+
+      document.getElementById('subtotalPreview').textContent = subtotal.toFixed(2) || '-';
+      document.getElementById('totalPreview').textContent = total.toFixed(2) || '-';
+
+      // Actualizar los valores de Subtotal y Total
+      document.getElementById('subtotal').textContent = subtotal.toFixed(2) || '0';
+      document.getElementById('total').textContent = total.toFixed(2) || '0';
+    });
+
+    // Generar PDF con jsPDF, incluyendo el logo y nombre del vendedor
+    document.getElementById('generatePdfBtn').addEventListener('click', function() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const clienteName = document.getElementById('clienteName').textContent;
+      const producto = document.getElementById('productoPreview').textContent;
+      const cantidad = document.getElementById('cantidadPreview').textContent;
+      const precioUnitario = document.getElementById('precioPreview').textContent;
+      const subtotal = document.getElementById('subtotalPreview').textContent;
+      const total = document.getElementById('totalPreview').textContent;
+      const fecha = document.getElementById('fecha').value;
+
+      const vendedor = "Nombre del Vendedor (obtener del usuario logueado)"; // Aquí puedes integrar la lógica para obtener el nombre del vendedor logueado
+      const logo = '/public/a4.png';  // Ruta de la imagen del logo, asegúrate de que esté disponible
+
+      // Cargar el logo
+      const img = new Image();
+      img.src = logo;
+      img.onload = function() {
+        doc.addImage(img, 'PNG', 10, 10, 50, 20);  // Agregar logo en la esquina superior izquierda
+        generarPdf();
+      };
+
+      function generarPdf() {
+        // Información de la empresa
+        doc.setFontSize(12);
+        doc.text('Nombre de la Empresa', 70, 20);
+        doc.text('RNC: 123456789', 70, 30);
+        doc.text('Dirección: Calle Principal, Santo Domingo, RD', 70, 40);
+        doc.text('Teléfono: (809) 555-5555', 70, 50);
+
+        // Datos del vendedor
+        doc.text(`Vendedor: ${vendedor}`, 10, 60);
+        doc.text(`Fecha de la Cotización: ${fecha}`, 10, 70);
+
+        // Datos del cliente
+        doc.text(`Cotización para el cliente: ${clienteName}`, 10, 80);
+
+        // Detalles del producto/servicio
+        doc.text(`Producto/Servicio: ${producto}`, 10, 90);
+        doc.text(`Cantidad: ${cantidad}`, 10, 100);
+        doc.text(`Precio Unitario: $${precioUnitario}`, 10, 110);
+        doc.text(`Subtotal: $${subtotal}`, 10, 120);
+        doc.text(`Total: $${total}`, 10, 130);
+
+        // Leyenda de la cotización según las normativas
+        doc.setFontSize(10);
+        doc.text('Esta cotización es válida por 30 días. Impuestos aplicables no están incluidos.', 10, 150);
+
+        // Guardar el PDF
+        doc.save('cotizacion.pdf');
+      }
+    });
+  </script>
+</body>
+</html>

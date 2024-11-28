@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - A4 Soluciones Corporativas</title>
+    <link rel="stylesheet" href="css/usuarios.css"> 
+</head>
+<body>
+    <div class="container">
+        <h2>Gestión de Usuarios</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Nombre Completo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="userList">
+                <!-- cargar los usuarios dinámicamente -->
+            </tbody>
+        </table>
+        <button id="createUserBtn">Crear Usuario</button>
+        <div class="logout-btn">
+            <button id="logoutBtn">Cerrar Sesión</button>
+        </div>
+    </div>
+    <!-- Formulario para Crear Usuarios (Oculto por defecto) -->
+    <div class="login-container hidden" id="createUserFormContainer">
+        <h2>Crear Usuario</h2>
+        <form id="createUserForm">
+            <input type="text" id="newFullName" placeholder="Nombre Completo" required>
+            <input type="text" id="newUsername" placeholder="Nuevo Usuario" required>
+            <input type="password" id="newPassword" placeholder="Nueva Contraseña" required>
+            <button type="submit">Crear</button>
+        </form>
+        <div class="create-user">
+            <button id="cancelCreateUserBtn">Cancelar</button>
+        </div>
+    </div>
+    <script>
+        // Verificar el usuario administrador
+        const currentUser = localStorage.getItem('username');
+        if (currentUser !== 'admin') {
+            alert('Acceso denegado. Solo el administrador puede acceder a esta página.');
+            window.location.href = 'login.html';
+        }
+
+        // Cargar la lista de usuarios
+        const userList = document.getElementById('userList');
+        function loadUsers() {
+            fetch('/users')
+                .then(response => response.json())
+                .then(data => {
+                    userList.innerHTML = ''; // Limpiar lista de usuarios
+                    data.forEach(user => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${user.username}</td>
+                            <td>${user.fullName}</td>
+                            <td class="edit-delete-buttons">
+                                <button onclick="editFullName('${user.id}')">Editar Nombre</button>
+                                <button onclick="editUsername('${user.id}')">Editar Usuario</button>
+                                <button onclick="deleteUser('${user.id}')">Eliminar</button>
+                            </td>
+                        `;
+                        userList.appendChild(tr);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Mostrar el formulario de crear usuario
+        document.getElementById('createUserBtn').addEventListener('click', function() {
+            document.getElementById('createUserFormContainer').classList.remove('hidden');
+        });
+
+        // Cancelar la creación de usuario
+        document.getElementById('cancelCreateUserBtn').addEventListener('click', function() {
+            document.getElementById('createUserFormContainer').classList.add('hidden');
+        });
+
+        // Manejar la creación de un nuevo usuario
+        document.getElementById('createUserForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const newFullName = document.getElementById('newFullName').value;
+            const newUsername = document.getElementById('newUsername').value;
+            const newPassword = document.getElementById('newPassword').value;
+            fetch('/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ fullName: newFullName, username: newUsername, password: newPassword })
+            })
+            .then(response => response.json())
+            .then(() => {
+                loadUsers();
+                document.getElementById('createUserFormContainer').classList.add('hidden'); // Ocultar el formulario
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // Editar nombre completo
+        function editFullName(id) {
+            const newFullName = prompt('Ingrese el nuevo nombre completo para el usuario:');
+            if (newFullName) {
+                fetch(`/users/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ fullName: newFullName })
+                })
+                .then(() => loadUsers())
+                .catch(error => console.error('Error:', error));
+            }
+        }
+
+        // Editar nombre de usuario
+        function editUsername(id) {
+            const newUsername = prompt('Ingrese el nuevo nombre de usuario:');
+            if (newUsername) {
+                fetch(`/users/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username: newUsername })
+                })
+                .then(() => loadUsers())
+                .catch(error => console.error('Error:', error));
+            }
+        }
+
+        // Eliminar usuario
+        function deleteUser(id) {
+            if (confirm(`¿Estás seguro de que deseas eliminar el usuario?`)) {
+                fetch(`/users/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(() => loadUsers())
+                .catch(error => console.error('Error:', error));
+            }
+        }
+
+        // Cerrar sesión
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem('loggedIn');
+            localStorage.removeItem('username');
+            window.location.href = 'login.html';
+        });
+
+        // Renderizar usuarios al cargar la página
+        loadUsers();
+    </script>
+</body>
+</html>

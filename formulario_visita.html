@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Visita</title>
+    <link rel="stylesheet" href="css/visits.css">
+</head>
+<body>
+  <h1>Registro de Visita</h1>
+  <form id="visitForm">
+    <label for="nombre">Nombre:</label>
+    <input type="text" id="nombre" name="nombre" required>
+    <label for="apellido">Apellido:</label>
+    <input type="text" id="apellido" name="apellido" required>
+    <label for="fecha">Fecha:</label>
+    <input type="date" id="fecha" name="fecha" required>
+    <label for="motivo">Motivo:</label>
+    <textarea id="motivo" name="motivo" required></textarea>
+    <button type="submit">Registrar Visita</button>
+  </form>
+
+  <script>
+    document.getElementById('visitForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const nombre = document.getElementById('nombre').value;
+      const apellido = document.getElementById('apellido').value;
+      const fecha = document.getElementById('fecha').value;
+      const motivo = document.getElementById('motivo').value;
+
+      fetch('/visits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, apellido, fecha, motivo })
+      }).then(() => alert('Visita registrada correctamente'));
+    });
+  </script>
+</body>
+</html>
